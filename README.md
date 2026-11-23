@@ -47,13 +47,15 @@ mascota propia, partículas flotantes y herramientas para tu maratón de series.
 - **🔄 Actualizaciones**: consulta GitHub Releases y ofrece descargar la versión nueva.
 - **🌐 Acceso directo** a la página de descargas.
 
-## 📷 Capturas
+## 📷 Vista previa ilustrada
+
+*(Diseño conceptual generado con `tools/make_previews.py`; las capturas reales se añadirán al instalar la v1.2 en el dispositivo.)*
 
 <div align="center">
 
 | Calculadora | Herramientas anime |
 | :---: | :---: |
-| <img src="docs/screenshots/calculator.png" alt="Calculadora" width="280"> | <img src="docs/screenshots/anime.png" alt="Herramientas anime" width="280"> |
+| <img src="docs/screenshots/calculator.png" alt="Vista previa de la calculadora" width="280"> | <img src="docs/screenshots/anime.png" alt="Vista previa de herramientas anime" width="280"> |
 
 </div>
 
@@ -76,6 +78,7 @@ res/drawable/ic_launcher.xml            Icono vectorial de la app
 res/drawable/mascot.xml                 Mascota vectorial
 java/com/buddyapps/anicalc/MainActivity.java   UI, lógica y animación
 tools/make_banner.py                    Generador del banner (PNG puro, sin librerías)
+tools/make_previews.py                  Generador de vistas previas ilustradas
 docs/INSTALACION.md                     Cómo compilar e instalar
 docs/ACTUALIZACIONES.md                 Backup y actualizaciones
 docs/DISEÑO.md                          Identidad visual y paletas

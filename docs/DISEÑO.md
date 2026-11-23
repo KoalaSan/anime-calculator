@@ -56,3 +56,4 @@ Escala usada en `MainActivity.java` (sp):
 - `res/drawable/mascot.xml`: chibi vectorial (pelo rosa y violeta, flor de sakura).
 - `res/drawable/ic_launcher.xml`: icono vectorial de 108 dp con calculadora y flor.
 - `assets/banner.png`: banner 1200×630 generado por `tools/make_banner.py`.
+- `docs/screenshots/*.png`: vistas previas ilustradas de `tools/make_previews.py`.
