@@ -38,6 +38,7 @@ app.properties                          Versión y SDK mínimo
 java/com/buddyapps/anicalc/MainActivity.java   Toda la lógica y la UI en código
 docs/INSTALACION.md                     Cómo compilar e instalar
 docs/ACTUALIZACIONES.md                 Cómo funciona copia de seguridad y updates
+docs/VERIFICACION.md                    Pruebas realizadas en el dispositivo
 CHANGELOG.md                            Historial de versiones
 backup.sh                               Guarda el APK y sube el repo a GitHub
 ```
