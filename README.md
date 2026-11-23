@@ -11,6 +11,7 @@ mascota propia, partículas flotantes y herramientas para tu maratón de series.
 [![Java](https://img.shields.io/badge/Java-8-007396?logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Release](https://img.shields.io/github/v/release/KoalaSan/anime-calculator?color=ff6fa9)](https://github.com/KoalaSan/anime-calculator/releases)
 [![Downloads](https://img.shields.io/github/downloads/KoalaSan/anime-calculator/total?color=9b6dff)](https://github.com/KoalaSan/anime-calculator/releases)
+[![Licencia](https://img.shields.io/badge/licencia-MIT-4c9bff)](LICENSE)
 [![Hecho con](https://img.shields.io/badge/hecho%20con-%E2%99%A5-ff6fa9)](https://github.com/KoalaSan)
 
 [Descargar APK](https://github.com/KoalaSan/anime-calculator/releases/latest) ·
