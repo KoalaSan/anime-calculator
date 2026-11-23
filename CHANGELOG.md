@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1 (2026-11-23)
+
+- Corregido el historial: ahora muestra ambos operandos y el resultado (antes repetía el resultado).
+- Actualizado el número de versión que compara la app con GitHub Releases.
+
 ## 1.0 (2026-11-23)
 
 - Calculadora básica con tema anime: +, −, ×, ÷, decimal, ±, %, C, ⌫ e historial.

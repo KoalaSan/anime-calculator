@@ -28,9 +28,9 @@ El script:
 5. Crea el Release en GitHub con el tag `v<versionName>` y sube el APK:
 
 ```bash
-gh release create v1.0 apk/AnimeCalc-v1.0.apk \
+gh release create v1.1 apk/AnimeCalc-v1.1.apk \
   --repo KoalaSan/anime-calculator \
-  --title "Anime Calc v1.0" --notes "Primera versión"
+  --title "Anime Calc v1.1" --notes "Descripción de los cambios"
 ```
 
 ## Cómo lo detecta la app

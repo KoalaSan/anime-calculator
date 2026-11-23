@@ -25,8 +25,8 @@ toolchain local de Buddy (sin Gradle ni Android Studio).
 | Campo | Valor |
 | --- | --- |
 | Paquete | `com.buddyapps.anicalc` |
-| versionCode | 1 |
-| versionName | 1.0 |
+| versionCode | 2 |
+| versionName | 1.1 |
 | minSdk | 26 (Android 8.0) |
 | Repositorio | https://github.com/KoalaSan/anime-calculator |
 
