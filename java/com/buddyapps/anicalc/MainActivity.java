@@ -1,10 +1,15 @@
 package com.buddyapps.anicalc;
 
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -14,7 +19,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -25,12 +32,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Anime Calc - calculadora con tema anime y pequeñas herramientas para seguidores de anime.
+ * Anime Calc - calculadora con tema anime, tres paletas de color y herramientas para fans.
  * Sin dependencias externas: solo Android framework y Java 8.
  */
 public class MainActivity extends Activity {
@@ -39,16 +50,39 @@ public class MainActivity extends Activity {
             "https://api.github.com/repos/KoalaSan/anime-calculator/releases/latest";
     private static final String REPO_URL =
             "https://github.com/KoalaSan/anime-calculator/releases";
-    private static final String CURRENT_VERSION = "1.1";
+    private static final String CURRENT_VERSION = "1.2";
 
-    private static final int BG_DARK = 0xFF141024;
-    private static final int PANEL = 0xFF211A38;
-    private static final int PINK = 0xFFFF6FA9;
-    private static final int PURPLE = 0xFF9B6DFF;
-    private static final int DIGIT_BG = 0xFF2E2650;
-    private static final int OP_BG = 0xFF452F79;
-    private static final int MUTED = 0xFFC3B2E6;
-    private static final int TEXT = 0xFFFFFFFF;
+    private static final String THEME_SAKURA = "✿ Sakura";
+    private static final String THEME_HOSHI = "✧ Hoshizora";
+    private static final String THEME_YORU = "☾ Yoru";
+
+    // bgTop, bgMid, bgBottom, accent, accent2, digit, operator, clear
+    private static final int[][] THEMES = {
+            {0xFF140F24, 0xFF2A1748, 0xFF100D1E, 0xFFFF6FA9, 0xFF9B6DFF, 0xFF2E2650, 0xFF452F79, 0xFF5A2547},
+            {0xFF08182B, 0xFF103A5E, 0xFF071320, 0xFF63D9FF, 0xFF4C9BFF, 0xFF153A5D, 0xFF1C5487, 0xFF17395F},
+            {0xFF130C28, 0xFF2C1A4E, 0xFF0B0818, 0xFFC68BFF, 0xFF7A5CFF, 0xFF2A1F48, 0xFF3E2A6B, 0xFF47276E}
+    };
+
+    private int themeIndex = 0;
+    private int accent, accent2, bgTop, bgMid, bgBottom, digitBg, opBg, clearBg;
+
+    private FrameLayout frame;
+    private SparkleView sparkles;
+    private TextView title, subtitle, footer;
+    private Button themeButton, calcTab, animeTab;
+    private View calcPanel, animePanel;
+    private LinearLayout displayCard;
+    private TextView display, historyView;
+
+    private final List<Button> digitButtons = new ArrayList<>();
+    private final List<Button> opButtons = new ArrayList<>();
+    private final List<Button> clearButtons = new ArrayList<>();
+    private final List<Button> wideButtons = new ArrayList<>();
+    private final List<TextView> sectionTexts = new ArrayList<>();
+    private final List<TextView> resultTexts = new ArrayList<>();
+    private final List<EditText> fields = new ArrayList<>();
+    private final List<LinearLayout> cards = new ArrayList<>();
+    private Button equalsButton;
 
     // Estado de la calculadora
     private String input = "0";
@@ -58,13 +92,6 @@ public class MainActivity extends Activity {
     private boolean waiting = false;
     private boolean errorState = false;
 
-    private TextView display;
-    private TextView historyView;
-    private View calcPanel;
-    private View animePanel;
-    private Button calcTab;
-    private Button animeTab;
-
     private EditText totalEp;
     private EditText seenEp;
     private EditText minutesEp;
@@ -72,51 +99,25 @@ public class MainActivity extends Activity {
     private EditText notesInput;
     private TextView notesResult;
 
-    private final DecimalFormat df = new DecimalFormat("0.##########", new java.text.DecimalFormatSymbols(Locale.US));
+    private final DecimalFormat df = new DecimalFormat("0.##########", new DecimalFormatSymbols(Locale.US));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        frame = new FrameLayout(this);
+        sparkles = new SparkleView(this);
+        frame.addView(sparkles, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(BG_DARK);
-        GradientDrawable bg = new GradientDrawable(
-                GradientDrawable.Orientation.TL_BR,
-                new int[]{BG_DARK, 0xFF241640, 0xFF12101F});
-        root.setBackground(bg);
+        frame.addView(root, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        setContentView(frame);
 
-        // Cabecera
-        TextView title = new TextView(this);
-        title.setText("✿ ANIME CALC ✿");
-        title.setTextSize(22);
-        title.setTypeface(null, android.graphics.Typeface.BOLD);
-        title.setTextColor(PINK);
-        title.setGravity(Gravity.CENTER);
-        title.setPadding(0, dp(18), 0, dp(2));
-        root.addView(title);
-
-        TextView subtitle = new TextView(this);
-        subtitle.setText("(◕‿◕)  計算する  がんばって！");
-        subtitle.setTextSize(12);
-        subtitle.setTextColor(MUTED);
-        subtitle.setGravity(Gravity.CENTER);
-        subtitle.setPadding(0, 0, 0, dp(14));
-        root.addView(subtitle);
-
-        // Pestañas
-        LinearLayout tabs = new LinearLayout(this);
-        tabs.setOrientation(LinearLayout.HORIZONTAL);
-        tabs.setPadding(dp(14), 0, dp(14), dp(8));
-        calcTab = tabButton("🧮 Calculadora", true);
-        animeTab = tabButton("🌸 Anime", false);
-        calcTab.setLayoutParams(rowParams(1));
-        animeTab.setLayoutParams(rowParams(1));
-        calcTab.setOnClickListener(v -> showPanel(true));
-        animeTab.setOnClickListener(v -> showPanel(false));
-        tabs.addView(calcTab);
-        tabs.addView(animeTab);
-        root.addView(tabs);
+        root.addView(buildHeader());
+        root.addView(buildTabs());
 
         calcPanel = buildCalculator();
         animePanel = buildAnimeTools();
@@ -132,26 +133,28 @@ public class MainActivity extends Activity {
         root.addView(content);
         animePanel.setVisibility(View.GONE);
 
-        TextView footer = new TextView(this);
+        footer = new TextView(this);
         footer.setText("Hecho con ♥ para fans del anime · v" + CURRENT_VERSION);
         footer.setTextSize(11);
-        footer.setTextColor(MUTED);
         footer.setGravity(Gravity.CENTER);
         footer.setPadding(0, dp(6), 0, dp(10));
         root.addView(footer);
 
-        setContentView(root);
+        applyTheme();
         updateDisplay();
     }
 
-    // ---------------- UI helpers ----------------
+    // ---------------- Utils de UI ----------------
 
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
-    private LinearLayout.LayoutParams rowParams(float weight) {
-        return new LinearLayout.LayoutParams(0, dp(44), weight);
+    private int mix(int a, int b, float ratio) {
+        int r = (int) (Color.red(a) * (1 - ratio) + Color.red(b) * ratio);
+        int g = (int) (Color.green(a) * (1 - ratio) + Color.green(b) * ratio);
+        int bl = (int) (Color.blue(a) * (1 - ratio) + Color.blue(b) * ratio);
+        return Color.rgb(r, g, bl);
     }
 
     private GradientDrawable rounded(int fill, int stroke, int radius) {
@@ -163,24 +166,11 @@ public class MainActivity extends Activity {
         return d;
     }
 
-    private Button tabButton(String text, boolean active) {
-        Button b = new Button(this);
-        b.setText(text);
-        b.setTextSize(14);
-        b.setAllCaps(false);
-        b.setTextColor(active ? TEXT : MUTED);
-        b.setBackground(rounded(active ? PURPLE : PANEL, active ? PINK : 0xFF4B3B72, 12));
-        return b;
-    }
-
-    private void showPanel(boolean calculator) {
-        calcPanel.setVisibility(calculator ? View.VISIBLE : View.GONE);
-        animePanel.setVisibility(calculator ? View.GONE : View.VISIBLE);
-        calcTab.setBackground(rounded(calculator ? PURPLE : PANEL, calculator ? PINK : 0xFF4B3B72, 12));
-        calcTab.setTextColor(calculator ? TEXT : MUTED);
-        animeTab.setBackground(rounded(calculator ? PANEL : PURPLE, calculator ? 0xFF4B3B72 : PINK, 12));
-        animeTab.setTextColor(calculator ? MUTED : TEXT);
-        buzz();
+    private StateListDrawable pressable(int fill, int stroke, int radius) {
+        StateListDrawable d = new StateListDrawable();
+        d.addState(new int[]{android.R.attr.state_pressed}, rounded(mix(fill, Color.WHITE, 0.18f), stroke, radius));
+        d.addState(new int[]{}, rounded(fill, stroke, radius));
+        return d;
     }
 
     private void buzz() {
@@ -191,33 +181,201 @@ public class MainActivity extends Activity {
         }
     }
 
+    // ---------------- Temas ----------------
+
+    private void applyTheme() {
+        int[] t = THEMES[themeIndex];
+        bgTop = t[0];
+        bgMid = t[1];
+        bgBottom = t[2];
+        accent = t[3];
+        accent2 = t[4];
+        digitBg = t[5];
+        opBg = t[6];
+        clearBg = t[7];
+        int muted = mix(accent2, Color.WHITE, 0.35f);
+
+        GradientDrawable bg = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR, new int[]{bgTop, bgMid, bgBottom});
+        frame.setBackground(bg);
+        sparkles.setColors(accent, accent2);
+
+        String[] names = {THEME_SAKURA, THEME_HOSHI, THEME_YORU};
+        themeButton.setText(names[themeIndex]);
+        themeButton.setTextSize(12);
+        themeButton.setTextColor(Color.WHITE);
+        themeButton.setBackground(pressable(opBg, accent, 20));
+
+        title.setTextColor(accent);
+        subtitle.setTextColor(muted);
+        footer.setTextColor(mix(accent2, Color.WHITE, 0.2f));
+
+        styleTab(calcTab, calcPanel.getVisibility() == View.VISIBLE);
+        styleTab(animeTab, animePanel.getVisibility() == View.VISIBLE);
+
+        displayCard.setBackground(rounded(mix(bgBottom, Color.WHITE, 0.06f), accent2, 18));
+        display.setTextColor(Color.WHITE);
+        historyView.setTextColor(muted);
+
+        for (Button b : digitButtons) {
+            b.setBackground(pressable(digitBg, mix(accent2, Color.WHITE, 0.25f), 14));
+            b.setTextColor(Color.WHITE);
+        }
+        for (Button b : opButtons) {
+            b.setBackground(pressable(opBg, accent, 14));
+            b.setTextColor(accent);
+        }
+        for (Button b : clearButtons) {
+            b.setBackground(pressable(clearBg, mix(accent, Color.WHITE, 0.25f), 14));
+            b.setTextColor(mix(accent, Color.WHITE, 0.7f));
+        }
+        equalsButton.setBackground(pressable(accent, accent2, 14));
+        equalsButton.setTextColor(bgTop);
+
+        for (TextView s : sectionTexts) s.setTextColor(accent);
+        for (TextView r : resultTexts) {
+            r.setBackground(rounded(mix(opBg, Color.BLACK, 0.2f), accent2, 12));
+            r.setTextColor(mix(accent2, Color.WHITE, 0.65f));
+        }
+        for (Button b : wideButtons) {
+            b.setBackground(pressable(opBg, accent, 12));
+            b.setTextColor(Color.WHITE);
+        }
+        for (EditText e : fields) {
+            e.setBackground(rounded(mix(bgBottom, Color.WHITE, 0.06f), accent2, 10));
+            e.setTextColor(Color.WHITE);
+            e.setHintTextColor(mix(accent2, Color.WHITE, 0.45f));
+        }
+        for (LinearLayout c : cards) {
+            c.setBackground(rounded(mix(bgBottom, Color.WHITE, 0.05f), mix(accent2, Color.BLACK, 0.35f), 18));
+        }
+    }
+
+    private void styleTab(Button b, boolean active) {
+        b.setBackground(pressable(active ? opBg : mix(bgBottom, Color.WHITE, 0.04f),
+                active ? accent : mix(accent2, Color.BLACK, 0.45f), 20));
+        b.setTextColor(active ? Color.WHITE : mix(accent2, Color.WHITE, 0.35f));
+    }
+
+    // ---------------- Cabecera y pestañas ----------------
+
+    private View buildHeader() {
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        header.setPadding(dp(16), dp(16), dp(14), dp(8));
+
+        int mascotId = getResources().getIdentifier("mascot", "drawable", getPackageName());
+        if (mascotId != 0) {
+            ImageView mascot = new ImageView(this);
+            mascot.setImageResource(mascotId);
+            mascot.setAdjustViewBounds(true);
+            mascot.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(76), dp(76));
+            lp.rightMargin = dp(10);
+            mascot.setLayoutParams(lp);
+            header.addView(mascot);
+        }
+
+        LinearLayout titles = new LinearLayout(this);
+        titles.setOrientation(LinearLayout.VERTICAL);
+        titles.setLayoutParams(new LinearLayout.LayoutParams(0,
+                ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        title = new TextView(this);
+        title.setText("✿ ANIME CALC ✿");
+        title.setTextSize(21);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        titles.addView(title);
+
+        subtitle = new TextView(this);
+        subtitle.setText("(◕‿◕)  計算する  がんばって！");
+        subtitle.setTextSize(12);
+        titles.addView(subtitle);
+
+        header.addView(titles);
+
+        themeButton = new Button(this);
+        themeButton.setText(THEME_SAKURA);
+        themeButton.setAllCaps(false);
+        themeButton.setMinWidth(0);
+        themeButton.setMinimumWidth(0);
+        themeButton.setLayoutParams(new LinearLayout.LayoutParams(dp(112), dp(44)));
+        themeButton.setOnClickListener(v -> {
+            themeIndex = (themeIndex + 1) % THEMES.length;
+            applyTheme();
+            buzz();
+        });
+        header.addView(themeButton);
+        return header;
+    }
+
+    private View buildTabs() {
+        LinearLayout tabs = new LinearLayout(this);
+        tabs.setOrientation(LinearLayout.HORIZONTAL);
+        tabs.setPadding(dp(16), dp(4), dp(16), dp(8));
+
+        calcTab = new Button(this);
+        calcTab.setText("🧮 Calculadora");
+        animeTab = new Button(this);
+        animeTab.setText("🌸 Anime");
+        for (Button b : new Button[]{calcTab, animeTab}) {
+            b.setTextSize(14);
+            b.setAllCaps(false);
+            b.setMinWidth(0);
+            b.setMinimumWidth(0);
+            b.setLayoutParams(new LinearLayout.LayoutParams(0, dp(46), 1f));
+        }
+        calcTab.setOnClickListener(v -> showPanel(true));
+        animeTab.setOnClickListener(v -> showPanel(false));
+        tabs.addView(calcTab);
+        tabs.addView(animeTab);
+        return tabs;
+    }
+
+    private void showPanel(boolean calculator) {
+        calcPanel.setVisibility(calculator ? View.VISIBLE : View.GONE);
+        animePanel.setVisibility(calculator ? View.GONE : View.VISIBLE);
+        styleTab(calcTab, calculator);
+        styleTab(animeTab, !calculator);
+        buzz();
+    }
+
+    // ---------------- Calculadora ----------------
+
     private View buildCalculator() {
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(dp(14), dp(4), dp(14), dp(6));
+        panel.setPadding(dp(16), dp(4), dp(16), dp(8));
+
+        displayCard = new LinearLayout(this);
+        displayCard.setOrientation(LinearLayout.VERTICAL);
+        displayCard.setPadding(dp(14), dp(10), dp(14), dp(10));
+        displayCard.setElevation(dp(6));
+        displayCard.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 0.6f));
 
         historyView = new TextView(this);
         historyView.setTextSize(14);
-        historyView.setTextColor(MUTED);
         historyView.setGravity(Gravity.END);
-        historyView.setPadding(dp(6), dp(6), dp(8), dp(2));
-        panel.addView(historyView);
+        historyView.setPadding(0, 0, dp(4), dp(4));
+        displayCard.addView(historyView);
 
         display = new TextView(this);
-        display.setTextSize(42);
-        display.setTextColor(TEXT);
+        display.setTextSize(46);
+        display.setTypeface(Typeface.DEFAULT_BOLD);
         display.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         display.setSingleLine(true);
-        display.setPadding(dp(8), dp(2), dp(8), dp(14));
         display.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 0.55f));
-        panel.addView(display);
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        displayCard.addView(display);
+        panel.addView(displayCard);
 
         GridLayout grid = new GridLayout(this);
         grid.setColumnCount(4);
         grid.setRowCount(5);
         grid.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.45f));
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.4f));
 
         String[][] keys = {
                 {"C", "⌫", "%", "÷"},
@@ -239,26 +397,13 @@ public class MainActivity extends Activity {
     }
 
     private Button makeCalcButton(String key) {
-        int bg = DIGIT_BG;
-        int fg = TEXT;
-        if ("+-×÷".contains(key) && key.length() == 1) {
-            bg = OP_BG;
-            fg = PINK;
-        }
-        if (key.equals("=")) {
-            bg = PINK;
-            fg = BG_DARK;
-        }
-        if (key.equals("C")) {
-            bg = 0xFF5A2547;
-            fg = 0xFFFFD6E8;
-        }
         Button b = new Button(this);
         b.setText(key);
-        b.setTextSize(18);
+        b.setTextSize(19);
         b.setAllCaps(false);
-        b.setTextColor(fg);
-        b.setBackground(rounded(bg, key.equals("=") ? PINK : 0xFFFFFFFF & 0x22FFFFFF, 14));
+        b.setMinWidth(0);
+        b.setMinimumWidth(0);
+
         GridLayout.LayoutParams lp = new GridLayout.LayoutParams(
                 GridLayout.spec(GridLayout.UNDEFINED, 1f),
                 GridLayout.spec(GridLayout.UNDEFINED, 1f));
@@ -266,123 +411,20 @@ public class MainActivity extends Activity {
         lp.height = 0;
         lp.setMargins(dp(4), dp(4), dp(4), dp(4));
         b.setLayoutParams(lp);
+
+        if ("+-×÷".contains(key) && key.length() == 1) {
+            opButtons.add(b);
+        } else if (key.equals("=")) {
+            b.setTextSize(22);
+            b.setTypeface(Typeface.DEFAULT_BOLD);
+            equalsButton = b;
+        } else if (key.equals("C") || key.equals("⌫")) {
+            clearButtons.add(b);
+        } else {
+            digitButtons.add(b);
+        }
         return b;
     }
-
-    private View buildAnimeTools() {
-        ScrollView scroll = new ScrollView(this);
-        LinearLayout panel = new LinearLayout(this);
-        panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(dp(16), dp(10), dp(16), dp(10));
-
-        TextView t1 = section("📺  Progreso de anime");
-        panel.addView(t1);
-
-        totalEp = field("Episodios totales", "12");
-        seenEp = field("Episodios vistos", "5");
-        minutesEp = field("Minutos por episodio", "24");
-        panel.addView(totalEp);
-        panel.addView(seenEp);
-        panel.addView(minutesEp);
-
-        Button calcProgress = wideButton("Calcular progreso ✦");
-        calcProgress.setOnClickListener(v -> calculateProgress());
-        panel.addView(calcProgress);
-
-        progressResult = resultView("Introduce los datos y pulsa calcular.");
-        panel.addView(progressResult);
-
-        TextView t2 = section("⭐  Promedio de notas");
-        panel.addView(t2);
-
-        notesInput = field("Notas separadas por coma", "8.5, 9, 7.5");
-        panel.addView(notesInput);
-
-        Button calcNotes = wideButton("Calcular promedio ✦");
-        calcNotes.setOnClickListener(v -> calculateNotes());
-        panel.addView(calcNotes);
-
-        notesResult = resultView("Escribe varias notas y pulsa calcular.");
-        panel.addView(notesResult);
-
-        TextView t3 = section("⬇️  Copia de seguridad / actualizaciones");
-        panel.addView(t3);
-
-        TextView info = new TextView(this);
-        info.setText("El código y el APK de cada versión están en GitHub. Pulsa el botón para comprobar si hay una versión nueva.");
-        info.setTextSize(12);
-        info.setTextColor(MUTED);
-        info.setPadding(dp(4), dp(2), dp(4), dp(10));
-        panel.addView(info);
-
-        Button update = wideButton("🔄  Buscar actualización");
-        update.setOnClickListener(v -> checkForUpdate());
-        panel.addView(update);
-
-        Button openRepo = wideButton("🌐  Abrir GitHub");
-        openRepo.setOnClickListener(v -> openUrl(REPO_URL));
-        panel.addView(openRepo);
-
-        scroll.addView(panel);
-        return scroll;
-    }
-
-    private TextView section(String text) {
-        TextView t = new TextView(this);
-        t.setText(text);
-        t.setTextSize(17);
-        t.setTypeface(null, android.graphics.Typeface.BOLD);
-        t.setTextColor(PINK);
-        t.setPadding(dp(4), dp(16), dp(4), dp(8));
-        return t;
-    }
-
-    private EditText field(String hint, String sample) {
-        EditText e = new EditText(this);
-        e.setHint(hint + "  (ej. " + sample + ")");
-        e.setHintTextColor(0xFF8C7CB5);
-        e.setTextColor(TEXT);
-        e.setTextSize(15);
-        e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        e.setBackground(rounded(PANEL, PURPLE, 10));
-        e.setPadding(dp(12), dp(10), dp(12), dp(10));
-        e.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) e.getLayoutParams();
-        lp.bottomMargin = dp(8);
-        e.setLayoutParams(lp);
-        return e;
-    }
-
-    private Button wideButton(String text) {
-        Button b = new Button(this);
-        b.setText(text);
-        b.setTextSize(14);
-        b.setAllCaps(false);
-        b.setTextColor(TEXT);
-        b.setBackground(rounded(OP_BG, PINK, 12));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(46));
-        lp.bottomMargin = dp(8);
-        b.setLayoutParams(lp);
-        return b;
-    }
-
-    private TextView resultView(String text) {
-        TextView t = new TextView(this);
-        t.setText(text);
-        t.setTextSize(14);
-        t.setTextColor(0xFFD8CBFF);
-        t.setBackground(rounded(PANEL, 0xFF4B3B72, 10));
-        t.setPadding(dp(12), dp(12), dp(12), dp(12));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.bottomMargin = dp(6);
-        t.setLayoutParams(lp);
-        return t;
-    }
-
-    // ---------------- Calculator logic ----------------
 
     private void onKey(String key) {
         buzz();
@@ -520,7 +562,124 @@ public class MainActivity extends Activity {
         historyView.setText(history);
     }
 
-    // ---------------- Anime tools ----------------
+    // ---------------- Herramientas anime ----------------
+
+    private LinearLayout card() {
+        LinearLayout c = new LinearLayout(this);
+        c.setOrientation(LinearLayout.VERTICAL);
+        c.setPadding(dp(14), dp(12), dp(14), dp(14));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dp(12);
+        c.setLayoutParams(lp);
+        cards.add(c);
+        return c;
+    }
+
+    private View buildAnimeTools() {
+        ScrollView scroll = new ScrollView(this);
+        LinearLayout panel = new LinearLayout(this);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        panel.setPadding(dp(16), dp(8), dp(16), dp(12));
+
+        // Tarjeta de progreso
+        LinearLayout progressCard = card();
+        progressCard.addView(section("📺  Progreso de anime"));
+        totalEp = field("Episodios totales", "12");
+        seenEp = field("Episodios vistos", "5");
+        minutesEp = field("Minutos por episodio", "24");
+        progressCard.addView(totalEp);
+        progressCard.addView(seenEp);
+        progressCard.addView(minutesEp);
+        Button calcProgress = wideButton("Calcular progreso ✦");
+        calcProgress.setOnClickListener(v -> calculateProgress());
+        progressCard.addView(calcProgress);
+        progressResult = resultView("Introduce los datos y pulsa calcular.");
+        progressCard.addView(progressResult);
+        panel.addView(progressCard);
+
+        // Tarjeta de notas
+        LinearLayout notesCard = card();
+        notesCard.addView(section("⭐  Promedio de notas"));
+        notesInput = field("Notas separadas por coma", "8.5, 9, 7.5");
+        notesCard.addView(notesInput);
+        Button calcNotes = wideButton("Calcular promedio ✦");
+        calcNotes.setOnClickListener(v -> calculateNotes());
+        notesCard.addView(calcNotes);
+        notesResult = resultView("Escribe varias notas y pulsa calcular.");
+        notesCard.addView(notesResult);
+        panel.addView(notesCard);
+
+        // Tarjeta de GitHub
+        LinearLayout githubCard = card();
+        githubCard.addView(section("⬇️  Copia de seguridad / actualizaciones"));
+        TextView info = new TextView(this);
+        info.setText("El código y el APK de cada versión están en GitHub. Pulsa el botón para comprobar si hay una versión nueva.");
+        info.setTextSize(12);
+        info.setPadding(dp(2), dp(2), dp(2), dp(10));
+        githubCard.addView(info);
+        Button update = wideButton("🔄  Buscar actualización");
+        update.setOnClickListener(v -> checkForUpdate());
+        githubCard.addView(update);
+        Button openRepo = wideButton("🌐  Abrir GitHub");
+        openRepo.setOnClickListener(v -> openUrl(REPO_URL));
+        githubCard.addView(openRepo);
+        panel.addView(githubCard);
+
+        scroll.addView(panel);
+        return scroll;
+    }
+
+    private TextView section(String text) {
+        TextView t = new TextView(this);
+        t.setText(text);
+        t.setTextSize(17);
+        t.setTypeface(Typeface.DEFAULT_BOLD);
+        t.setPadding(dp(2), dp(2), dp(2), dp(10));
+        sectionTexts.add(t);
+        return t;
+    }
+
+    private EditText field(String hint, String sample) {
+        EditText e = new EditText(this);
+        e.setHint(hint + "  (ej. " + sample + ")");
+        e.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        e.setPadding(dp(12), dp(10), dp(12), dp(10));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dp(8);
+        e.setLayoutParams(lp);
+        fields.add(e);
+        return e;
+    }
+
+    private Button wideButton(String text) {
+        Button b = new Button(this);
+        b.setText(text);
+        b.setTextSize(14);
+        b.setAllCaps(false);
+        b.setMinWidth(0);
+        b.setMinimumWidth(0);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(46));
+        lp.bottomMargin = dp(8);
+        b.setLayoutParams(lp);
+        wideButtons.add(b);
+        return b;
+    }
+
+    private TextView resultView(String text) {
+        TextView t = new TextView(this);
+        t.setText(text);
+        t.setTextSize(14);
+        t.setPadding(dp(12), dp(12), dp(12), dp(12));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dp(4);
+        t.setLayoutParams(lp);
+        resultTexts.add(t);
+        return t;
+    }
 
     private void calculateProgress() {
         try {
@@ -577,7 +736,7 @@ public class MainActivity extends Activity {
         return h + " h " + m + " min";
     }
 
-    // ---------------- GitHub update check ----------------
+    // ---------------- Actualizaciones ----------------
 
     private void checkForUpdate() {
         Toast.makeText(this, "Buscando actualización…", Toast.LENGTH_SHORT).show();
@@ -654,6 +813,63 @@ public class MainActivity extends Activity {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         } catch (Exception e) {
             Toast.makeText(this, "No se pudo abrir el enlace", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Fondo de partículas: estrellas y pétalos flotando suavemente. */
+    private class SparkleView extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final float[] xs = new float[24];
+        private final float[] ys = new float[24];
+        private final float[] sizes = new float[24];
+        private final float[] phases = new float[24];
+        private int c1 = Color.WHITE;
+        private int c2 = Color.WHITE;
+        private float phase = 0f;
+
+        SparkleView(Activity activity) {
+            super(activity);
+            Random random = new Random(2026);
+            for (int i = 0; i < xs.length; i++) {
+                xs[i] = random.nextFloat();
+                ys[i] = random.nextFloat();
+                sizes[i] = 1.5f + random.nextFloat() * 3.5f;
+                phases[i] = random.nextFloat() * 6.28f;
+            }
+            ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+            animator.setDuration(5200);
+            animator.setRepeatCount(ValueAnimator.INFINITE);
+            animator.addUpdateListener(a -> {
+                phase = (float) a.getAnimatedValue();
+                invalidate();
+            });
+            animator.start();
+        }
+
+        void setColors(int first, int second) {
+            c1 = first;
+            c2 = second;
+            invalidate();
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            int w = getWidth();
+            int h = getHeight();
+            for (int i = 0; i < xs.length; i++) {
+                float alpha = 0.2f + 0.55f * (0.5f + 0.5f * (float) Math.sin(phase * 6.283f + phases[i]));
+                paint.setColor(i % 2 == 0 ? c1 : c2);
+                paint.setAlpha((int) (alpha * 170));
+                float cx = xs[i] * w;
+                float cy = ((ys[i] - phase * 0.05f + 1f) % 1f) * h;
+                canvas.drawCircle(cx, cy, sizes[i], paint);
+                if (i % 4 == 0) {
+                    paint.setStrokeWidth(1.4f);
+                    canvas.drawLine(cx - sizes[i] * 2.4f, cy, cx + sizes[i] * 2.4f, cy, paint);
+                    canvas.drawLine(cx, cy - sizes[i] * 2.4f, cx, cy + sizes[i] * 2.4f, paint);
+                }
+            }
         }
     }
 }

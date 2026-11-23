@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Aura -->
+    <path
+        android:fillColor="#6B4AA8"
+        android:fillAlpha="0.28"
+        android:pathData="M50,50 m-45,0 a45,45 0 1,0 90,0 a45,45 0 1,0 -90,0" />
+
+    <!-- Cuerpo / hoodie -->
+    <path
+        android:fillColor="#FF8FBE"
+        android:pathData="M50,100 C25,100 16,87 16,71 C16,61 25,55 34,53 L66,53 C75,55 84,61 84,71 C84,87 75,100 50,100 Z" />
+    <path
+        android:fillColor="#FFF2F8"
+        android:pathData="M34,53 L50,67 L66,53 L59,51 L50,59 L41,51 Z" />
+    <path
+        android:fillColor="#FF6FA9"
+        android:pathData="M47,68 L53,68 L55,76 L50,80 L45,76 Z" />
+
+    <!-- Pelo detrás -->
+    <path
+        android:fillColor="#B57BFF"
+        android:pathData="M50,9 C26,9 16,27 18,50 C19,60 24,67 31,69 L69,69 C76,67 81,60 82,50 C84,27 74,9 50,9 Z" />
+
+    <!-- Cara -->
+    <path
+        android:fillColor="#FFE3D3"
+        android:pathData="M50,22 m-26,0 a26,28 0 1,0 52,0 a26,28 0 1,0 -52,0" />
+
+    <!-- Flequillo -->
+    <path
+        android:fillColor="#FF9AC8"
+        android:pathData="M24,40 C22,20 34,9 50,9 C66,9 78,20 76,40 C70,32 64,30 58,34 C54,26 46,26 42,34 C36,30 30,32 24,40 Z" />
+
+    <!-- Ojos -->
+    <path
+        android:fillColor="#3B2254"
+        android:pathData="M39,44 m-4,0 a4,6 0 1,0 8,0 a4,6 0 1,0 -8,0" />
+    <path
+        android:fillColor="#3B2254"
+        android:pathData="M61,44 m-4,0 a4,6 0 1,0 8,0 a4,6 0 1,0 -8,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,41 m-1.5,0 a1.5,2 0 1,0 3,0 a1.5,2 0 1,0 -3,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M62,41 m-1.5,0 a1.5,2 0 1,0 3,0 a1.5,2 0 1,0 -3,0" />
+
+    <!-- Sonrojo -->
+    <path
+        android:fillColor="#FF7FA8"
+        android:fillAlpha="0.65"
+        android:pathData="M32,52 m-5,0 a5,3 0 1,0 10,0 a5,3 0 1,0 -10,0" />
+    <path
+        android:fillColor="#FF7FA8"
+        android:fillAlpha="0.65"
+        android:pathData="M68,52 m-5,0 a5,3 0 1,0 10,0 a5,3 0 1,0 -10,0" />
+
+    <!-- Sonrisa -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#B3446E"
+        android:strokeWidth="1.8"
+        android:pathData="M45,55 Q50,60 55,55" />
+
+    <!-- Flor en el pelo -->
+    <path
+        android:fillColor="#FFE1F0"
+        android:pathData="M74,24 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 M70,24 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 M78,24 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 M74,20 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 M74,28 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path
+        android:fillColor="#FFB43F"
+        android:pathData="M74,24 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+</vector>

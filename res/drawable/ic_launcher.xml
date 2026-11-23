@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Fondo redondeado -->
+    <path
+        android:fillColor="#241541"
+        android:pathData="M12,0 L96,0 A12,12 0 0 1 108,12 L108,96 A12,12 0 0 1 96,108 L12,108 A12,12 0 0 1 0,96 L0,12 A12,12 0 0 1 12,0 Z" />
+    <!-- Halo -->
+    <path
+        android:fillColor="#3E2569"
+        android:pathData="M54,54 m-42,0 a42,42 0 1,0 84,0 a42,42 0 1,0 -84,0" />
+
+    <!-- Calculadora -->
+    <path
+        android:fillColor="#FFF2F8"
+        android:pathData="M31,22 L77,22 A6,6 0 0 1 83,28 L83,82 A6,6 0 0 1 77,88 L31,88 A6,6 0 0 1 25,82 L25,28 A6,6 0 0 1 31,22 Z" />
+    <path
+        android:fillColor="#FF6FA9"
+        android:pathData="M32,30 L76,30 A3,3 0 0 1 79,33 L79,45 A3,3 0 0 1 76,48 L32,48 A3,3 0 0 1 29,45 L29,33 A3,3 0 0 1 32,30 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M67,35 L74,35 L74,39 L67,39 Z" />
+    <path
+        android:fillColor="#9B6DFF"
+        android:pathData="M32,55 L43,55 L43,63 L32,63 Z M49,55 L60,55 L60,63 L49,63 Z M66,55 L77,55 L77,63 L66,63 Z M32,68 L43,68 L43,76 L32,76 Z M49,68 L60,68 L60,76 L49,76 Z M66,68 L77,68 L77,84 L66,84 Z M32,81 L43,81 L43,84 L32,84 Z M49,81 L60,81 L60,84 L49,84 Z" />
+
+    <!-- Flor de sakura -->
+    <path
+        android:fillColor="#FFD6E9"
+        android:pathData="M86,18 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0 M81,13 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 M91,13 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 M81,23 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 M91,23 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <path
+        android:fillColor="#FFB43F"
+        android:pathData="M86,18 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+
+    <!-- Estrella -->
+    <path
+        android:fillColor="#FFE9A8"
+        android:pathData="M18,16 L20,21 L25,23 L20,25 L18,30 L16,25 L11,23 L16,21 Z" />
+</vector>

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2 (2026-11-23)
+
+- Tres temas de color seleccionables desde la cabecera (Sakura, Hoshizora, Yoru).
+- Mascota vectorial, icono de launcher propio y fondo animado de estrellas/pétalos.
+- Tarjetas redondeadas, botones con estado pulsado y escala tipográfica revisada.
+- README rediseñado con banner, badges y capturas; documentación de identidad visual.
+
 ## 1.1 (2026-11-23)
 
 - Corregido el historial: ahora muestra ambos operandos y el resultado (antes repetía el resultado).
